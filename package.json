@@ -1,25 +1,20 @@
 {
-  "name": "copy-of-gemini-ai-multi-modal-suite",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
+  "name": "gemini-ai-multi-modal-suite",
+  "version": "1.0.0",
+  "description": "An all-in-one application showcasing the power of the Gemini API. Features include advanced chat with various modes (low-latency, thinking, search-grounded), image and video generation, image analysis, audio transcription, and real-time voice conversations.",
+  "main": "index.tsx",
   "dependencies": {
+    "@google/genai": "^1.28.0",
+    "diff-match-patch": "^1.0.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@google/genai": "^1.28.0",
-    "remark-gfm": "^4.0.1",
     "react-markdown": "^10.1.0",
-    "diff-match-patch": "^1.0.5"
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/diff-match-patch": "^1.0.36",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.3"
   }
 }
