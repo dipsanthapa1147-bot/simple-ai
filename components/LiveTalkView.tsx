@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, Blob } from '@google/genai';
-import { encode, decode, decodeAudioData } from '../utils/helpers';
+import { encode, decode, decodeAudioData, blobToBase64 } from '../utils/helpers';
 import { TranscriptionEntry } from '../types';
 import { MicIcon } from './icons/MicIcon';
 import { GeminiIcon } from './icons/GeminiIcon';
@@ -27,6 +27,8 @@ const LiveTalkView: React.FC = () => {
   const audioSourcesRef = useRef(new Set<AudioBufferSourceNode>());
   const videoStreamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameIntervalRef = useRef<number | null>(null);
   
   const currentInputTranscription = useRef('');
   const currentOutputTranscription = useRef('');
@@ -41,12 +43,19 @@ const LiveTalkView: React.FC = () => {
     transcriptionsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [transcriptions]);
 
+  const stopFrameStreaming = useCallback(() => {
+    if (frameIntervalRef.current) {
+        clearInterval(frameIntervalRef.current);
+        frameIntervalRef.current = null;
+    }
+  }, []);
+
   const cleanup = useCallback(() => {
+    stopFrameStreaming();
     scriptProcessorRef.current?.disconnect();
     mediaStreamRef.current?.getTracks().forEach(track => track.stop());
     videoStreamRef.current?.getTracks().forEach(track => track.stop());
     
-    // Check if context is not already closed before trying to close it
     if(inputAudioContextRef.current && inputAudioContextRef.current.state !== 'closed') {
         inputAudioContextRef.current.close();
     }
@@ -64,7 +73,66 @@ const LiveTalkView: React.FC = () => {
     videoStreamRef.current = null;
     inputAudioContextRef.current = null;
     outputAudioContextRef.current = null;
-  }, []);
+  }, [stopFrameStreaming]);
+
+  const stopConversation = useCallback(() => {
+    sessionPromiseRef.current?.then((session: any) => session.close());
+    sessionPromiseRef.current = null;
+    cleanup();
+    setIsConnected(false);
+    setIsConnecting(false);
+  }, [cleanup]);
+
+  const startFrameStreaming = useCallback(() => {
+    stopFrameStreaming();
+
+    const FPS = 5;
+    const JPEG_QUALITY = 0.7;
+
+    frameIntervalRef.current = window.setInterval(() => {
+        if (!videoRef.current || !canvasRef.current || !sessionPromiseRef.current || videoRef.current.readyState < 2) {
+            return;
+        }
+
+        const videoEl = videoRef.current;
+        const canvasEl = canvasRef.current;
+        const ctx = canvasEl.getContext('2d');
+        if (!ctx) return;
+
+        canvasEl.width = videoEl.videoWidth;
+        canvasEl.height = videoEl.videoHeight;
+        ctx.drawImage(videoEl, 0, 0, videoEl.videoWidth, videoEl.videoHeight);
+
+        canvasEl.toBlob(
+            async (blob) => {
+                if (blob && sessionPromiseRef.current) {
+                    try {
+                        const base64Data = await blobToBase64(blob);
+                        sessionPromiseRef.current.then((session: any) => {
+                            if (session) {
+                                session.sendRealtimeInput({
+                                    media: { data: base64Data, mimeType: 'image/jpeg' }
+                                });
+                            }
+                        });
+                    } catch (error) {
+                        console.error("Error processing video frame:", error);
+                    }
+                }
+            },
+            'image/jpeg',
+            JPEG_QUALITY
+        );
+    }, 1000 / FPS);
+  }, [stopFrameStreaming]);
+
+  useEffect(() => {
+    if (isConnected && isCameraOn) {
+      startFrameStreaming();
+    } else {
+      stopFrameStreaming();
+    }
+  }, [isConnected, isCameraOn, startFrameStreaming, stopFrameStreaming]);
 
 
   const startConversation = async () => {
@@ -165,14 +233,6 @@ const LiveTalkView: React.FC = () => {
       setIsConnecting(false);
     }
   };
-
-  const stopConversation = useCallback(() => {
-    sessionPromiseRef.current?.then((session: any) => session.close());
-    sessionPromiseRef.current = null;
-    cleanup();
-    setIsConnected(false);
-    setIsConnecting(false);
-  }, [cleanup]);
   
   useEffect(() => {
     return () => {
@@ -325,6 +385,7 @@ const LiveTalkView: React.FC = () => {
             ))}
         </div>
       </div>
+      <canvas ref={canvasRef} className="hidden"></canvas>
     </div>
   );
 };
