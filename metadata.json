@@ -1,0 +1,8 @@
+{
+  "name": "Copy of Gemini AI Multi-Modal Suite",
+  "description": "An all-in-one application showcasing the power of the Gemini API. Features include advanced chat with various modes (low-latency, thinking, search-grounded), image and video generation, image analysis, audio transcription, and real-time voice conversations.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}

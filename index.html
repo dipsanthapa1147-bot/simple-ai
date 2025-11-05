@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini AI Multi-Modal Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom scrollbar for better aesthetics in dark mode */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1f2937; /* gray-800 */
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4b5563; /* gray-600 */
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6b7280; /* gray-500 */
+    }
+    /* Add form-radio styles if not default in tailwind cdn */
+    .form-radio {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #4b5563;
+      transition: 0.2s all linear;
+      margin-right: 5px;
+      position: relative;
+      top: 4px;
+    }
+    .form-radio:checked {
+      border: 6px solid #3b82f6; /* blue-500 */
+    }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://aistudiocdn.com/react@^19.2.0",
+      "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+      "react/": "https://aistudiocdn.com/react@^19.2.0/",
+      "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
+      "remark-gfm": "https://aistudiocdn.com/remark-gfm@^4.0.1",
+      "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
+      "diff-match-patch": "https://aistudiocdn.com/diff-match-patch@^1.0.5"
+    }
+  }
+  </script>
+  <script type="module" src="/index.tsx"></script>
+</head>
+<body class="bg-gray-900">
+  <div id="root"></div>
+</body>
+</html>
